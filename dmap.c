@@ -1,3 +1,10 @@
+/*
+ * Copyright Ted Meyer 2015
+ *
+ * see LICENSE for details
+ *
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

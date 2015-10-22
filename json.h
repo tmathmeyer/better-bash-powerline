@@ -1,3 +1,9 @@
+/*
+ * Copyright Ted Meyer 2015
+ *
+ * see LICENSE for details
+ *
+ */
 
 #ifndef _JSON_H_
 #define _JSON_H_

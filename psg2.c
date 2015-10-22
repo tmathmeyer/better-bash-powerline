@@ -1,3 +1,9 @@
+/*
+ * Copyright Ted Meyer 2015
+ *
+ * see LICENSE for details
+ *
+ */
 
 #define _DEFAULT_SOURCE
 

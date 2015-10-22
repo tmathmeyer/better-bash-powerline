@@ -1,3 +1,10 @@
+/*
+ * Copyright Ted Meyer 2015
+ *
+ * see LICENSE for details
+ *
+ */
+
 #include <stdio.h>
 int main() {
 	int i=0, brk=51;

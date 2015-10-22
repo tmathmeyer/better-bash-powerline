@@ -100,7 +100,7 @@ char *user_module() {
 char *git_module(dmap *bl) {
     char *path = malloc(256);
     memset(path, 0, 256);
-    snprintf(path, 256, "/bin/bash %s/git/psg2/git.sh 2>/dev/null", getenv("HOME"));
+    snprintf(path, 256, "/bin/bash %s/.config/psg/git.sh 2>/dev/null", getenv("HOME"));
     FILE *git_info = popen(path, "r");
     if (git_info == NULL) {
         return NULL;
@@ -212,9 +212,14 @@ int main(int argc, char **argv) {
     char *buffer, *backup;
 
 
-    fp = fopen("sample.json", "r");
+    char *path = calloc(sizeof(char), 256);
+    memset(path, 0, 256);
+    snprintf(path, 256, "%s/.config/psg/psg.json", getenv("HOME"));
+
+    fp = fopen(path, "r");
     if (!fp) {
         perror("cannot read file");
+        perror(path);
         exit(1);
     }
 

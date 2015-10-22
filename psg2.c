@@ -20,8 +20,6 @@ struct psg {
     struct psg *next;
 } psg;
 
-static char *cwd = NULL;
-static char *usr = NULL;
 static dmap *map = NULL;
 
 char *proc_module() {
@@ -53,10 +51,10 @@ char *proc_module() {
     return itoaa(i);
 }
 
-char *cwd_module() {
+char *cwd_module(json *opts) {
     char *result = NULL;
     if (get(map, "path")) {
-        result = cwd;
+        result = get(map, "path");
     } else {
         char *cwd = malloc(1024);
         if (getcwd(cwd, 1024) != NULL) {
@@ -71,6 +69,11 @@ char *cwd_module() {
                 result = cwd;
             }
         }
+    }
+
+    json *delimit = get(opts->obj, "delimit");
+    if (strcmp("powerline", delimit->string)) {
+        return result;
     }
 
     if (result) {
@@ -89,34 +92,50 @@ char *cwd_module() {
 
 char *user_module() {
     if (get(map, "user")) {
-        return usr;
+        return get(map, "user");
     }
     return strdup(getenv("USER"));
 }
 
-char *git_module() {
-	char * path = malloc(256);
-	memset(path, 0, 256);
-	snprintf(path, 256, "/bin/bash %s/.config/psg/git.sh 2>/dev/null", getenv("HOME"));
-	FILE * git_info = popen(path, "r");
-	if (git_info == NULL) {
-		return NULL;
-	}
+char *git_module(dmap *bl) {
+    char *path = malloc(256);
+    memset(path, 0, 256);
+    snprintf(path, 256, "/bin/bash %s/git/psg2/git.sh 2>/dev/null", getenv("HOME"));
+    FILE *git_info = popen(path, "r");
+    if (git_info == NULL) {
+        return NULL;
+    }
 
-	char * branch = malloc(64);
-	int pos = 0; char c = 0;
-	while((c = fgetc(git_info)) != '\n' && c != EOF && pos < 64) {
-		if (c != '\\') {
-			branch[pos++] = c;
-		} else {
-			char n = fgetc(git_info);
-			if (n == 'e') {
-				branch[pos++] = '\e';
-			}
-		}
-	}
-	fclose(git_info);
-	return pos<14?NULL:branch;
+    char *branch = calloc(sizeof(char), 64);
+    int pos = 0; char c = 0;
+    while((c = fgetc(git_info)) != '\n' && c != EOF && pos < 64) {
+        branch[pos++] = c;
+    }
+    fclose(git_info);
+    if (pos < 1) {
+        return NULL;
+    }
+
+    if (strstr(branch, ":")) {
+        json *opts = get(bl, "options");
+        if (opts) {
+            dmap *omap = opts->obj;
+            
+            json *cfg = get(omap, "changes_forground");
+            json *cbg = get(omap, "changes_background");
+
+            if (cfg) {
+                put(bl, "forground", cfg);
+                puts("changing forground");
+            }
+
+            if (cbg) {
+                put(bl, "background", cbg);
+            }
+        }
+    }
+
+    return branch;
 }
 
 void print(char *str, json *conf, json *next) {
@@ -154,39 +173,39 @@ void parse_psg(psg *ps) {
         } else if (!(strcmp("user", src->string))) {
             ps->parsed = user_module();
         } else if (!(strcmp("path", src->string))) {
-            ps->parsed = cwd_module();
+            ps->parsed = cwd_module(get(ps->conf->obj, "options"));
         } else if (!(strcmp("git", src->string))) {
-            ps->parsed = git_module();
+            ps->parsed = git_module(ps->conf->obj);
         } else {
             ps->parsed = gen_module(src->string);
         }
-
-
         ps = ps->next;
     }
 }
 
 void print_psg(psg *ps) {
     while(ps) {
-        json *src = get(ps->conf->obj, "source");
-        if (!(strcmp("jobs", src->string))) {
-            print(proc_module(), ps->conf, ps->next&&ps->next->parsed?ps->next->conf:NULL);
-        } else if (!(strcmp("user", src->string))) {
-            print(user_module(), ps->conf, ps->next&&ps->next->parsed?ps->next->conf:NULL);
-        } else if (!(strcmp("path", src->string))) {
-            print(cwd_module(), ps->conf, ps->next&&ps->next->parsed?ps->next->conf:NULL);
-        } else if (!(strcmp("git", src->string))) {
-            print(git_module(), ps->conf, ps->next&&ps->next->parsed?ps->next->conf:NULL);
-        } else {
-            json *src = get(ps->conf->obj, "source");
-            puts(src->string);
-        }
-
+        print(ps->parsed, ps->conf, ps->next&&ps->next->parsed?ps->next->conf:NULL);
         ps = ps->next;
     }
 }
 
-int main() {
+void parse_arg(dmap *map, char *arg) {
+    char *eq = strstr(arg, "=");
+    if (!eq) {
+        fprintf(stderr, "error on [%s]; args are in form [name]=[value]", arg);
+        exit(1);
+    }
+    eq[0] = 0;
+    put(map, arg, eq+1);
+}
+
+void parse_args(dmap *map, int pl, char **argv) {
+    // TODO: real flags check here
+    parse_arg(map, argv[pl]);
+}
+
+int main(int argc, char **argv) {
 
     FILE *fp;
     long lSize;
@@ -237,8 +256,9 @@ int main() {
     }
 
     map = map_new();
-
-    //TODO parse
+    for(int i=1; i<argc; i++) {
+        parse_args(map, i, argv);
+    }
 
     parse_psg(head);
     print_psg(head);

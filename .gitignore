@@ -1,3 +1,4 @@
 *.o
-psg2
 *.swp
+psg2
+colors

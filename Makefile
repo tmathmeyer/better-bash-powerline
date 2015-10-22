@@ -2,7 +2,7 @@
 
 include config.mk
 
-all: psg2
+all: psg2 colors
 
 psg2: psg2.o json.o dmap.o
 
@@ -16,7 +16,10 @@ psg2:
 
 clean:
 	@echo cleaning
-	@rm -f psg2 *.o
+	@rm -f psg2 *.o colors
+
+colors:
+	gcc colors.c -o colors
 
 
-update: clean psg2
+update: clean all

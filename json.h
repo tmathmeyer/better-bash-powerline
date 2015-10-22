@@ -2,7 +2,6 @@
 #ifndef _JSON_H_
 #define _JSON_H_
 
-#include "dlist.h"
 #include "dmap.h"
 
 typedef

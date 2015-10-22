@@ -126,7 +126,6 @@ char *git_module(dmap *bl) {
 
             if (cfg) {
                 put(bl, "forground", cfg);
-                puts("changing forground");
             }
 
             if (cbg) {
@@ -272,5 +271,4 @@ int main(int argc, char **argv) {
     fclose(fp);
     free(backup);
 }
-
 

@@ -1,0 +1,37 @@
+[
+    {
+        "source": "jobs",
+        "forground": 1,
+        "background": 2,
+        "options": {
+            "hide_on_zero": true
+        }
+    },
+    {
+        "source": "user",
+        "forground": 253,
+        "background": 243
+    },
+    {
+        "source": "path",
+        "forground": 253,
+        "background": 238,
+        "options" : {
+            "delimit": "powerline",
+            "maxblocks": 5
+        }
+    },
+    {
+        "source": "git",
+        "forground": 123,
+        "background": 43,
+        "options": {
+            "changes_forground": 345,
+            "changes_background": 12,
+            "delimit": "powerline"
+        }
+    }
+]
+
+
+

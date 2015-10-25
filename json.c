@@ -11,16 +11,16 @@
 #include "json.h"
 #include "dmap.h"
 
-char purge_whitespace(char **str) {
+char purge_whitespace(charstream *stream) {
     while(1) {
-        switch(**str) {
+        switch(seq(stream)) {
             case ' ':
             case '\t':
             case '\n':
-                (void)((*str)++);
+                next(stream);
                 break;
             default:
-                return **str;
+                return seq(stream);
         }
     }
     return 0;
@@ -49,48 +49,48 @@ json *typr(int type, void *insrt) {
     return result;
 }
 
-dmap *array(char **str) {
+dmap *array(charstream *str) {
     dmap *result = map_new();
     int ctr = 0;
-    while(**str != ']') {
+    while(seq(str) != ']') {
         purge_whitespace(str);
         char *name = itoaa(ctr);
         put(result, name, read_json(str));
-        (void)(*str)++; // purge comma
+        (void)next(str); // purge comma
         ctr++;
     }
     return result;
 }
 
-char *string(char **str) {
+char *string(charstream *str) {
     int max = 10;
     int size = 0;
     char *result = calloc(sizeof(char), max);
-    while(**str && **str != '"') {
-        if (**str == '\\') {
-            (void)(*str)++;
+    while(seq(str) && seq(str) != '"') {
+        if (seq(str) == '\\') {
+            (void) next(str);
         }
-        result[size++] = **str;
+        result[size++] = seq(str);
         result[size+1] = 0;
         if (size == max-1) {
             max *=2;
             result = realloc(result, max);
         }
-        (void)(*str)++;
+        (void) next(str);
     }
-    (void)(*str)++; //remove quote
+    (void) next(str); //remove quote
     return result;
 }
 
-dmap *object(char **str) {
+dmap *object(charstream *str) {
     dmap *result = map_new();
     while(purge_whitespace(str) != '}') {
         char *name = read_json(str)->string;
         purge_whitespace(str);
-        (void)(*str)++; // purge colon
+        (void)next(str); // purge colon
         put(result, name, read_json(str));
     }
-    (void)(*str)++; //remove curly
+    (void)next(str); //remove curly
     return result;
 }
 
@@ -98,55 +98,55 @@ int is_numeric(char c) {
     return c<='9' && c>='0';
 }
 
-unsigned int number(char **str) {
+unsigned int number(charstream *str) {
     unsigned int result = 0;
-    while(is_numeric(**str)) {
+    while(is_numeric(seq(str))) {
         result *= 10;
-        result += (**str - '0');
-        (void)(*str)++;
+        result += (seq(str) - '0');
+        (void)next(str);
     }
     return result;
 }
 
-unsigned char boolean(char **str) {
-    switch(**str) {
+unsigned char boolean(charstream *str) {
+    switch(seq(str)) {
         case 'T': case 't':
-            (*str) += 4;
+            skip(str, 4);
             return 1;
         case 'F': case 'f':
-            (*str) += 5;
+            skip(str, 5);
             return 0;
     }
     perror("how did you even");
     return 0;
 }
 
-json *read_json(char **str) {
+json *read_json(charstream *j) {
     unsigned int n;
     unsigned char b;
-    while(**str) {
-        purge_whitespace(str);
-        switch(**str) {
+    while(seq(j)) {
+        purge_whitespace(j);
+        switch(seq(j)) {
             case '[':
-                (void)(*str)++;
-                return typr(0, array(str));
+                next(j);
+                return typr(0, array(j));
             case '{':
-                (void)(*str)++;
-                return typr(0, object(str));
+                next(j);
+                return typr(0, object(j));
             case '"':
-                (void)(*str)++;
-                return typr(2, string(str));
+                next(j);
+                return typr(2, string(j));
             case '1': case '2': case '3': case '4': case '5':
             case '6': case '7': case '8': case '9': case '0':
             case '-': case '.':
-                n = number(str);
+                n = number(j);
                 return typr(1, &n);
             case 't': case 'f':
             case 'T': case 'F':
-                b = boolean(str);
+                b = boolean(j);
                 return typr(3, &b);
             case ',':
-                (void)(*str)++;
+                next(j);
                 break;
             case 0:
                 return NULL;

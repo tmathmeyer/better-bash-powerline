@@ -4,7 +4,7 @@ include config.mk
 
 all: psg2 colors
 
-psg2: psg2.o json.o dmap.o
+psg2: psg2.o json.o dmap.o charstream.o
 
 .c.o: config.mk
 	@echo CC -c $<

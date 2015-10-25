@@ -9,6 +9,7 @@
 #define _JSON_H_
 
 #include "dmap.h"
+#include "charstream.h"
 
 typedef
 struct json {
@@ -21,7 +22,7 @@ struct json {
     int type;
 } json;
 
-json *read_json(char **string);
+json *read_json(charstream *j);
 void print_json(json *j);
 void free_json(json *j);
 char *itoaa(unsigned int i);

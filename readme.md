@@ -8,18 +8,18 @@ json strucure like the following:
 ```json
 [
     {
-        "name" : <a name in quotes>,
-        "forground": <256 color terminal color>,
-        "background": <256 color terminal color>
-        "default": <any quoted text> //optional
+        "name" : "<a name in quotes>",
+        "forground": "<256 color terminal color>",
+        "background": "<256 color terminal color>",
+        "default": "<any quoted text>", //optional
         "options" : { //optional
             "match" : {
                 from: "/",
                 "to": "\\"
             }
         }
-    },
-    ... // repeat many of these
+    }
+    // repeat many of these
 ]
 ```
 

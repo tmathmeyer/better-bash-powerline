@@ -36,4 +36,51 @@ which would display (on a test machine)
 ted  ~ 
 though it will be colored based on the config from stdin
 
+The optional match object specifies a simple string
+replace on the value of the text, NOT a regex replace.
 
+An example usage of psg would be:
+```bash
+# set the PS1 based on whether X is running
+PROMPT_COMMAND=precmd
+precmd() {
+  if [ "$DISPLAY" ]; then
+      LOC="${PWD/$HOME/\~}"
+      GIT=$(/home/ted/.config/psg/git.sh)
+      export PS1="$(cat ~/.config/psg/psg.json | psg2 user=$USER path=$LOC git=$GIT)"
+  else
+    export PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+  fi
+}
+```
+
+```json
+[
+    {
+        "name": "jobs",
+        "forground": 1,
+        "background": 2
+    },
+    {
+        "name": "user",
+        "forground": 253,
+        "background": 243
+    },
+    {
+        "name": "path",
+        "forground": 253,
+        "background": 238,
+        "options" : {
+            "match": {
+                "from" : "/",
+                "to" : "  "
+            }
+        }
+    },
+    {
+        "name": "git",
+        "forground": 52,
+        "background": 6
+    }
+]
+```

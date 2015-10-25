@@ -14,7 +14,7 @@ json strucure like the following:
         "default": "<any quoted text>", //optional
         "options" : { //optional
             "match" : {
-                from: "/",
+                "from": "/",
                 "to": "\\"
             }
         }

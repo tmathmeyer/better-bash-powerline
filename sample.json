@@ -1,32 +1,33 @@
-[
-    {
-        "source": "jobs",
-        "forground": 1,
-        "background": 2
+{
+    "style": {
+        "powerline": "minimal"
     },
-    {
-        "source": "user",
-        "forground": 253,
-        "background": 243
-    },
-    {
-        "source": "path",
-        "forground": 253,
-        "background": 238,
-        "options" : {
-            "delimit": "powerline"
+    "elements": [
+        {
+            "name": "jobs",
+            "forground": 1,
+            "background": 2
+        },
+        {
+            "name": "user",
+            "forground": 253,
+            "background": 243
+        },
+        {
+            "name": "path",
+            "forground": 253,
+            "background": 238,
+            "options" : {
+                "match": {
+                    "from" : "/",
+                    "to" : "  "
+                }
+            }
+        },
+        {
+            "name": "git",
+            "forground": 52,
+            "background": 6
         }
-    },
-    {
-        "source": "git",
-        "forground": 253,
-        "background": 5,
-        "options": {
-            "changes_forground": 345,
-            "changes_background": 6
-        }
-    }
-]
-
-
-
+    ]
+}

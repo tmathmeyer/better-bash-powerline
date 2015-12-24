@@ -66,7 +66,7 @@ char *matchreplace(char *str, json *tofrom) {
     return res;
 }
 
-void print(char *str, json *conf, json *next) {
+void print_powerline_full(char *str, json *conf, json *next) {
     if (!str) {
         return;
     }
@@ -91,6 +91,18 @@ void print(char *str, json *conf, json *next) {
     }
 
     printf(SOLID_RIGHT);
+}
+
+void print_powerline_light(char *str, json *conf) {
+    if (!str) {
+        return;
+    }
+    json *forground = get(conf->obj, "background");
+    if (colors) {
+        printf("\\[\\033[38;5;%im\\]", forground->number);
+    }
+    printf(" %s ", str);
+    printf(LINE_RIGHT);
 }
 
 char *optsprocess(char *src, json *opts) {
@@ -135,10 +147,23 @@ void parse_psg(psg *ps) {
     }
 }
 
-void print_psg(psg *ps) {
-    while(ps) {
-        print(ps->parsed, ps->conf, ps->next&&ps->next->parsed?ps->next->conf:NULL);
-        ps = ps->next;
+void print_psg(psg *ps, json *style) {
+    json *powerline = get(style->obj, "powerline");
+    char *pltype = powerline->string;
+    if (!strncmp(pltype, "full", 4)) {
+        while(ps) {
+            print_powerline_full(ps->parsed
+                    ,ps->conf
+                    ,ps->next&&ps->next->parsed?ps->next->conf:NULL);
+            ps = ps->next;
+        }
+    } else
+    if (!strncmp(pltype, "minimal", 7)) {
+        while(ps) {
+            print_powerline_light(ps->parsed, ps->conf);
+            ps = ps->next;
+        }
+        printf(" ");
     }
 }
 
@@ -162,11 +187,18 @@ void parse_args(dmap *map, int pl, char **argv) {
 
 int main(int argc, char **argv) {
     json *each, *j = read_json(streamfile(stdin));
+    json *elements = get(j->obj, "elements");
+    json *style = get(j->obj, "style");
+
+    if (!elements || !style) {
+        puts("cannot find a style or elements block in json");
+        return 1;
+    }
     
     psg *head = NULL;
     psg *tail = NULL;
 
-    jarray_each(j, each) {
+    jarray_each(elements, each) {
         psg *p = calloc(sizeof(psg), 1);
         p->next = NULL;
         p->conf = each;
@@ -186,7 +218,7 @@ int main(int argc, char **argv) {
     }
 
     parse_psg(head);
-    print_psg(head);
+    print_psg(head, style);
 
     if (colors) {
         printf("\\[\\e[0m\\]");

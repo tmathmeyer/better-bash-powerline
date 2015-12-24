@@ -57,8 +57,10 @@ dmap *array(charstream *str) {
         char *name = itoaa(ctr);
         put(result, name, read_json(str));
         (void)next(str); // purge comma
+        purge_whitespace(str);
         ctr++;
     }
+    (void)next(str); //remove square bracket
     return result;
 }
 
